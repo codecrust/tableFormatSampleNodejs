@@ -105,7 +105,7 @@ function callJoinTableAPI(extWs, gameId, tableTypeId, playerId, entryFee) {
             const resp = yield axios.post(`https://apiuat.gamesapp.com//api/v1/games/table/joinAndAdd`, postMsg);
             console.log("@@@@@@@response of callJoinTableAPI @@@@@@@@@");
             console.log(resp.data);
-            let tableGameId = resp.data.data.id + "";
+            let tableGameId = resp.data.data.tableGameId + "";
             console.log(resp.data);
             server_1.createANewPlayer(extWs, tableGameId, playerId, resp.data.data.balance);
             // callPlayerAddedToTableAPI(extWs, playerId, tableGameId, entryFee)

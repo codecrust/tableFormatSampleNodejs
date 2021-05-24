@@ -110,7 +110,7 @@ export async function callJoinTableAPI(extWs: ExtWebSocket, gameId: string, tabl
         const resp = await axios.post(`https://apiuat.gamesapp.com//api/v1/games/table/joinAndAdd`, postMsg);
         console.log("@@@@@@@response of callJoinTableAPI @@@@@@@@@");
         console.log(resp.data);
-        let tableGameId = resp.data.data.id + ""
+        let tableGameId = resp.data.data.tableGameId + ""
         console.log(resp.data);
         createANewPlayer(extWs, tableGameId, playerId, resp.data.data.balance);
 
