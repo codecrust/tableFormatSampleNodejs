@@ -11,6 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TableGameRoom = void 0;
 const apicalls_1 = require("../apicalls");
+const server_1 = require("../server");
 const Utils_1 = require("./Utils");
 class TableGameRoom {
     constructor(tableGameId, gameId, tableTypeId) {
@@ -30,8 +31,7 @@ class TableGameRoom {
     }
     addPlayerToRoom(pl, playerBal) {
         if (this.currentPlayersCount == this.maxPlayers || this.gameStarted) {
-            this.currentPlayersCount++;
-            this.removePlayerFromRoom(pl);
+            apicalls_1.callPlayerLeftTableAPI(pl.playerID, pl.tableGameID);
             return;
         }
         for (let i = 0; i < this.maxPlayers; i++)
@@ -48,10 +48,12 @@ class TableGameRoom {
             bal: pl.balance
         };
         pl.sendMessage({ t: "joined", data: pl.plRoomNetId, bal: pl.balance, snap: this.getRoomSnap(pl.plRoomNetId) });
-        console.log(this.getRoomSnap(pl.plRoomNetId));
         this.sendMessageToOthers(playerAddedMsg, pl.plRoomNetId);
         this.currentPlayersCount++;
-        this.restartGame();
+        if (this.currentPlayersCount >= this.minPlayers && !this.countdownStarted) {
+            this.countdownStarted = true;
+            this.countDownTimeOut = setTimeout(this.decreaseCountDownTimer.bind(this), 1000);
+        }
     }
     removePlayerFromRoom(pl) {
         delete this.PlayersUniqIdDict[pl.plRoomNetId];
@@ -89,12 +91,18 @@ class TableGameRoom {
     decreaseCountDownTimer() {
         //send update to everyone about lobby timer
         this.countDown--;
-        console.log("decreaseCountDown " + this.countDown);
+        console.log("CountDown Room:" + this.tableGameId + " =>" + this.countDown);
         this.sendMessageToAll({ t: "timer", data: this.countDown });
         //Reset timer
         if (this.countDown == 0) {
-            apicalls_1.callTableGameStartingAPI(this.gameId, this.tableGameId);
-            this.startGame();
+            this.gameStarted = true;
+            if (this.currentPlayersCount >= this.minPlayers) {
+                apicalls_1.callTableGameStartingAPI(this.gameId, this.tableGameId);
+                this.startGame();
+            }
+            else {
+                delete server_1.GameRoomsDict[this.tableGameId];
+            }
         }
         else {
             this.countDownTimeOut = setTimeout(this.decreaseCountDownTimer.bind(this), 1000);
@@ -179,7 +187,7 @@ class TableGameRoom {
             }
             else {
                 this.gamePlayTimer--;
-                console.log("this.gamePlayTimer:" + this.gamePlayTimer);
+                console.log("gameTimer Room: " + this.tableGameId + " =>" + this.gamePlayTimer);
                 this.sendMessageToAll({ t: "gTimer", data: this.gamePlayTimer });
                 this.gamePlayTimeout = setTimeout(this.gamePlayLoop.bind(this), 1000);
             }
@@ -204,9 +212,12 @@ class TableGameRoom {
             apicalls_1.callTableGameStartingAPI(this.gameId, this.tableGameId);
             this.startGame();
         }
-        else if (this.currentPlayersCount >= this.minPlayers && !this.countdownStarted && !this.gameStarted) {
+        else if (this.currentPlayersCount >= this.minPlayers) {
             this.countdownStarted = true;
             this.countDownTimeOut = setTimeout(this.decreaseCountDownTimer.bind(this), 1000);
+        }
+        else {
+            delete server_1.GameRoomsDict[this.tableGameId];
         }
     }
 }

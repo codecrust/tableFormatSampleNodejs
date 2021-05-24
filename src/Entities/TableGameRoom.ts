@@ -1,4 +1,5 @@
 import { callAutoRefillAPI, callGetPlayerBalanceAPI, callPlayerLeftTableAPI, callTableGameEndingAPI, callTableGameStartingAPI, callUpdateCoinWalletAPI } from "../apicalls";
+import { GameRoomsDict } from "../server";
 import { Player } from "./Player";
 import { CHOICE } from "./Utils";
 
@@ -23,8 +24,7 @@ export class TableGameRoom {
 
 
         if (this.currentPlayersCount == this.maxPlayers || this.gameStarted) {
-            this.currentPlayersCount++;
-            this.removePlayerFromRoom(pl)
+            callPlayerLeftTableAPI(pl.playerID, pl.tableGameID)
             return
         }
 
@@ -39,7 +39,6 @@ export class TableGameRoom {
 
 
 
-
         pl.gRoom = this;
         pl.balance = playerBal
 
@@ -48,12 +47,15 @@ export class TableGameRoom {
             data: pl.plRoomNetId,
             bal: pl.balance
         };
+
         pl.sendMessage({ t: "joined", data: pl.plRoomNetId, bal: pl.balance, snap: this.getRoomSnap(pl.plRoomNetId) })
-        console.log(this.getRoomSnap(pl.plRoomNetId))
         this.sendMessageToOthers(playerAddedMsg, pl.plRoomNetId)
         this.currentPlayersCount++;
-        this.restartGame()
 
+        if (this.currentPlayersCount >= this.minPlayers && !this.countdownStarted) {
+            this.countdownStarted = true;
+            this.countDownTimeOut = setTimeout(this.decreaseCountDownTimer.bind(this), 1000)
+        }
     }
 
 
@@ -112,14 +114,19 @@ export class TableGameRoom {
 
         //send update to everyone about lobby timer
         this.countDown--;
-        console.log("decreaseCountDown " + this.countDown)
+        console.log("CountDown Room:"+this.tableGameId+" =>" + this.countDown)
 
         this.sendMessageToAll({ t: "timer", data: this.countDown });
 
         //Reset timer
         if (this.countDown == 0) {
-            callTableGameStartingAPI(this.gameId, this.tableGameId)
-            this.startGame();
+            this.gameStarted = true;
+            if (this.currentPlayersCount >= this.minPlayers) {
+                callTableGameStartingAPI(this.gameId, this.tableGameId)
+                this.startGame();
+            } else {
+                delete GameRoomsDict[this.tableGameId]
+            }
 
         } else {
 
@@ -229,7 +236,7 @@ export class TableGameRoom {
         }
         else {
             this.gamePlayTimer--
-            console.log("this.gamePlayTimer:" + this.gamePlayTimer)
+            console.log("gameTimer Room: "+this.tableGameId+" =>" + this.gamePlayTimer)
 
             this.sendMessageToAll({ t: "gTimer", data: this.gamePlayTimer })
             this.gamePlayTimeout = setTimeout(this.gamePlayLoop.bind(this), 1000)
@@ -246,6 +253,8 @@ export class TableGameRoom {
 
     }
 
+
+
     restartGame() {
         this.choosenNum = null;
         this.totalPotAmount = 0;
@@ -257,9 +266,11 @@ export class TableGameRoom {
             callTableGameStartingAPI(this.gameId, this.tableGameId);
             this.startGame();
         }
-        else if (this.currentPlayersCount >= this.minPlayers && !this.countdownStarted && !this.gameStarted) {
+        else if (this.currentPlayersCount >= this.minPlayers) {
             this.countdownStarted = true;
             this.countDownTimeOut = setTimeout(this.decreaseCountDownTimer.bind(this), 1000)
+        } else {
+            delete GameRoomsDict[this.tableGameId];
         }
     }
 
