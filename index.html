@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <title>GiftCraft IO</title>
+        <link rel="shortcut icon" href="TemplateData/favicon.ico">
+        <link rel="stylesheet" href="TemplateData/style.css">
+        <script>
+    window.aiptag = window.aiptag || { cmd: [] };
+    aiptag.cmd.display = aiptag.cmd.display || [];
+    aiptag.cmd.player = aiptag.cmd.player || [];
+
+    //CMP tool settings
+    aiptag.cmp = {
+      show: true,
+      position: "centered",  //centered, bottom
+      button: true,
+      buttonText: "Privacy settings",
+      buttonPosition: "bottom-left" //bottom-left, bottom-right, top-left, top-right
+    }
+
+    aiptag.cmd.player.push(function () {
+      adplayer = new aipPlayer({
+        AD_WIDTH: 960,
+        AD_HEIGHT: 540,
+        AD_FULLSCREEN: true,
+        AD_CENTERPLAYER: false,
+        LOADING_TEXT: 'loading advertisement',
+        PREROLL_ELEM: function () { return document.getElementById('preroll') },
+        AIP_COMPLETE: function (evt) {
+          /*******************
+           ***** WARNING *****
+           *******************
+           Please do not remove the PREROLL_ELEM
+           from the page, it will be hidden automaticly.
+           If you do want to remove it use the AIP_REMOVE callback.
+          */
+       //   alert("Preroll Ad Completed: " + evt);
+          gameInstance.SendMessage('JSlistener', 'VideoAdHasEnded');
+
+        },
+        AIP_REMOVE: function () {
+          // Here it's save to remove the PREROLL_ELEM from the page if you want. But it's not recommend.
+        }
+      });
+    });
+
+  //  }
+  </script>
+        <script async
+            src="//api.adinplay.com/libs/aiptag/pub/BLS/giftcraft.io/tag.min.js"></script>
+    </head>
+
+    <body>
+        <div id="unity-container" class="unity-desktop">
+            <canvas id="unity-canvas"></canvas>
+            <div id="unity-loading-bar">
+                <div id="unity-logo"></div>
+                <div id="unity-progress-bar-empty">
+                    <div id="unity-progress-bar-full"></div>
+                </div>
+            </div>
+            <div id="unity-footer">
+                <div id="unity-webgl-logo"></div>
+                <div id="unity-fullscreen-button"></div>
+                <div id="unity-build-title">GiftCraft</div>
+            </div>
+        </div>
+
+        <script>
+    var gameInstance;
+
+    var buildUrl = "Build";
+
+    var loaderUrl = buildUrl + "/webgl6.loader.js";
+    var config = {
+      dataUrl: buildUrl + "/webgl6.data.br",
+      frameworkUrl: buildUrl + "/webgl6.framework.js.br",
+      codeUrl: buildUrl + "/webgl6.wasm.br",
+      streamingAssetsUrl: "StreamingAssets",
+      companyName: "CodeCrust",
+      productName: "GiftHunter2",
+      productVersion: "0.7",
+    };
+    var container = document.querySelector("#unity-container");
+    var canvas = document.querySelector("#unity-canvas");
+    var loadingBar = document.querySelector("#unity-loading-bar");
+    var progressBarFull = document.querySelector("#unity-progress-bar-full");
+    var fullscreenButton = document.querySelector("#unity-fullscreen-button");
+
+    container.className = "unity-mobile";
+    config.devicePixelRatio = 1;
+    loadingBar.style.display = "block";
+
+    var script = document.createElement("script");
+    script.src = loaderUrl;
+    script.onload = () => {
+      createUnityInstance(canvas, config, (progress) => { progressBarFull.style.width = 100 * progress + "%"; })
+        .then((unityInstance) => {
+          gameInstance = unityInstance;
+          loadingBar.style.display = "none";
+          fullscreenButton.onclick = () => {
+            unityInstance.SetFullscreen(1);
+          };
+        }).catch((message) => {
+          alert(message);
+        });
+    };
+
+    function IsSSL() {
+
+      console.log("checking for ssl");
+
+      let hasSSLCheck = ('https:' == document.location.protocol);
+      /*  if (hasSSLCheck) {
+          gameInstance.SendMessage('JSlistener', 'hasSSL');
+          console.log("ssl found sending call");
+  
+        }*/
+    }
+    function HideGAD() {
+      console.log('hidegad');
+      document.getElementById("left-side-ad").style.display = 'none';
+    }
+    function ShowGAD() {
+      console.log('ShowGAD');
+      document.getElementById("left-side-ad").style.display = 'block';
+    }
+    function showVideoAd() {
+
+      console.log("shw video ad");
+      if (typeof adplayer !== 'undefined') {
+        aiptag.cmd.player.push(function () { adplayer.startPreRoll(); });
+      } else {
+        gameInstance.SendMessage('JSlistener', 'VideoAdHasEnded');
+      }
+    }
+	
+let rcvdVoices=false;
+
+if (speechSynthesis) {
+    
+    
+if(!rcvdVoices){
+rcvdVoices=true;
+  // wait on voices to be loaded before fetching list
+  speechSynthesis.onvoiceschanged = function() {
+    voices = speechSynthesis.getVoices();
+    voices.forEach(function (voice, index) {
+      console.log(voice.name)
+    });
+	}
+	}
+	
+ else {
+  console.log("Bad news!  Your browser doesn't have the Speech Synthesis API this project requires.  Try opening this webpage using the newest version of Google Chrome.");
+}
+
+}
+
+function speakNow(str){
+say(str)
+console.log(str);
+}
+
+
+function getVoiceFromName (name) {
+  var foundVoice = null;
+  if(voices){
+  voices.forEach(function (voice, index) {
+    if (voice.name === name) {
+      foundVoice = voice;
+    }
+  });
+      
+  }
+  
+  return foundVoice;
+}
+
+function say (text) {
+    
+  var speech = new SpeechSynthesisUtterance(text);
+  speechSynthesis.cancel();
+  let voice =getVoiceFromName("Google UK English Female");
+  if(voice){
+  speech.voice = voice;
+  speechSynthesis.speak(speech);
+}
+    
+}
+
+    function ShowGAED() {
+
+      console.log('ShowGAED');
+      document.getElementById("left-side-ad").style.display = 'block';
+
+
+      // aiptag.cmd.player.push(function() { adplayer.startPreRoll(); });
+
+    }
+    function HideGAED() {
+
+      console.log('HideGAED');
+      document.getElementById("left-side-ad").style.display = 'none';
+	  
+if(Math.random()<0.333){	  
+      showVideoAd();
+	  }
+    else{
+	        gameInstance.SendMessage('JSlistener', 'VideoAdHasEnded');
+}
+	}
+
+    document.body.appendChild(script);
+  </script>
+        <div id="left-side-ad"
+            style="position:absolute;z-index:1200;bottom:55px;left:5px;width:300px;height:250px;">
+            <div id='giftcraft-io_300x250'>
+                <script type='text/javascript'>
+        aiptag.cmd.display.push(function() { aipDisplayTag.display('giftcraft-io_300x250'); });
+      </script>
+            </div>
+        </div>
+        <div id="preroll"></div>
+    </body>
+
+</html>

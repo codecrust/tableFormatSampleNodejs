@@ -1,0 +1,1 @@
+{"version":3,"file":"GameSession.js","sourceRoot":"","sources":["../../../Entities/GameSession.ts"],"names":[],"mappings":";;;AAEA,MAAa,WAAW;IAEpB,YACW,aAAqB;QAArB,kBAAa,GAAb,aAAa,CAAQ;QAKhC,YAAO,GAAa,EAAE,CAAC;QACvB,qBAAgB,GAAW,CAAC,CAAC;QAC7B,gBAAW,GAAS,IAAI,IAAI,EAAE,CAAC;QAC/B,gBAAW,GAAY,KAAK,CAAC;QAC7B,kBAAa,GAAY,KAAK,CAAA;IAL9B,CAAC;CAOJ;AAdD,kCAcC"}
