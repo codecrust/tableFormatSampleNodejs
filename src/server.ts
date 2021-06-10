@@ -78,7 +78,7 @@ wss.on('connection', (ws: WebSocket) => {
 
             console.log(message)
 
-            callJoinTableAPI(extWs, "11", "2", message.playerID, message.entryFee);
+            callJoinTableAPI(extWs, "12", "2", message.playerID, message.entryFee);
             //create a player object
             //getPlayerData from Database
 

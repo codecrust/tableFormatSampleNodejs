@@ -51,7 +51,7 @@ wss.on('connection', (ws) => {
         message = JSON.parse(msg);
         if (message.t == "connect") {
             console.log(message);
-            apicalls_1.callJoinTableAPI(extWs, "11", "2", message.playerID, message.entryFee);
+            apicalls_1.callJoinTableAPI(extWs, "12", "2", message.playerID, message.entryFee);
             //create a player object
             //getPlayerData from Database
         }
